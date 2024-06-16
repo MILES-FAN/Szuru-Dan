@@ -60,11 +60,12 @@ def search_posts():
     query = request.args.get('tags', '')
     query = parse_query(query)
     #print(query)
-    limit = request.args.get('limit', 100)
+    limit = request.args.get('limit', 40)
+    limit = min(int(limit), 40)
     page = request.args.get('page', 1)
     login = request.args.get('login', None)
     api_key = request.args.get('api_key', None)
-    posts_per_page = 40
+    posts_per_page = limit
     if login and api_key:
         headers['Authorization'] = f'Token {encode_auth_headers(login, api_key)}'
     # Calculate offset based on page number
