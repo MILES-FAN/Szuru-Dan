@@ -21,13 +21,15 @@ A flask server that translate szuru api to danbooru style. (To let danbooru clie
     Then rename the `config_.ini` to `config.ini`
 
     ```
-    [SZURUBOORU]
-    # The url of the szurubooru server
-    url=http://127.0.0.1:8080/ 
+    [API]
+    #The url of the szurubooru server
+    base_url=http://127.0.0.1:8080/ 
 
-    [SERVICE]
-    # The port of this api translator
-    port=9000 
+    #The domain of the szurubooru server, left it empty if you don't have a domain
+    domain_url=http://yourdomain.com/ 
+
+    #The port of the api translator
+    port=9000
     ```
 
 4. Run the server
@@ -45,7 +47,8 @@ A flask server that translate szuru api to danbooru style. (To let danbooru clie
 - `/favorites/{id}.json`
 - `/post_votes.json`
 - `/users/{id}.json`
-- `profile.json`
+- `/profile.json`
+- `/tags/autocomplete.json`
 
 ## Tested Clients
 
