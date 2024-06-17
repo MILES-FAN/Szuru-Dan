@@ -449,4 +449,4 @@ def convert_post_format(szuru_post, login=None):
     return ret
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0' , port=9000)
+    app.run(debug=True, host='0.0.0.0' , port=SERVICE_PORT)
