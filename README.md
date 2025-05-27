@@ -22,23 +22,28 @@ A flask server that translate szuru api to danbooru style. (To let danbooru clie
 
     ```
     [API]
-    #The url of the szurubooru server
-    base_url=http://127.0.0.1:8080/ 
+    # The url of the szurubooru server
+    backend_url = http://127.0.0.1:8080/
 
-    #The domain of the szurubooru server, left it empty if you don't have a domain
-    domain_url=http://yourdomain.com/ 
+    # The port of the api translator
+    port = 9000
 
-    #The port of the api translator
-    port=9000
+    # Enable reverse proxy mode 
+    # Function: Image url will be translated to the url of the reverse proxy server
+    # (Warning: If you are deploying this api translator on a cloud server, watch out for the bandwidth)
+    reverse_proxy_mode = false
+
+    # Enable performance timing logs (for debugging, most of the time you don't need it and the bottleneck is the szurubooru server)
+    enable_timing_logs = false
     ```
 
 4. Run the server
 
     ```bash
-    python api-translator.py
+    python app.py
     ```
 
- 5. Now you can use your favorite danbooru clients to connect to the server.
+5. Now you can use your favorite danbooru clients to connect to the server.
 
 ## Supported API
 - `/posts.json`
