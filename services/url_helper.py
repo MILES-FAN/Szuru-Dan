@@ -18,5 +18,4 @@ def build_resource_url(resource_path):
         # 反向代理模式：使用当前域名
         return f"{get_current_domain()}{resource_path}"
     else:
-        # 普通模式：使用配置的域名
-        return f"{config.DOMAIN_URL}{resource_path}" 
+        return f"{config.DOMAIN_URL}{resource_path}"

@@ -1,4 +1,5 @@
 import configparser
+import sys
 
 class Config:
     def __init__(self):
@@ -30,6 +31,19 @@ class Config:
         
         self.SERVICE_PORT = int(config['API']['port'])
         self.SZURUBOORU_API_URL = f'{self.SZURUBOORU_URL}api'
+
+        # 打印配置信息 - 使用 sys.stdout 并强制刷新
+        config_info = f"""
+=== Configuration Loaded ===
+Szurubooru URL: {self.SZURUBOORU_URL}
+Service Port: {self.SERVICE_PORT}
+Reverse Proxy Mode: {self.REVERSE_PROXY_MODE}
+Domain URL: {self.DOMAIN_URL}
+Enable Timing Logs: {self.ENABLE_TIMING_LOGS}
+============================
+"""
+        print(config_info, flush=True)
+        sys.stdout.flush()
 
 # Global config instance
 config = Config() 
