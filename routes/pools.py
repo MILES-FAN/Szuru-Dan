@@ -66,7 +66,7 @@ def search_pools():
         terms.append('category:collection')
     elif category == 'series':
         terms.append('-category:collection')
-    order = request.args.get('search[order]', 'updated_at')
+    order = request.args.get('search[order]') or request.args.get('search[sort]', 'updated_at')
     terms.append(f"sort:{pool_order_map.get(order, 'last-edit-date')}")
 
     offset, limit = get_page_params()

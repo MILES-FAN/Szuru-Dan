@@ -126,6 +126,7 @@ def convert_post_format(szuru_post, login=None):
             'pixiv_id': None,
             'tag_string': tags_str(szuru_post['tags']),
             'fav_string': f'fav:{CURRENT_USER_ID}' if favorited else '',
+            'is_favorited': favorited,
             'tag_string_general': general_tag_string,
             'tag_string_artist': artist_tag_string,
             'tag_string_character': character_tag_string,

@@ -7,17 +7,122 @@ def tags_str(tags):
 
     return ' '.join(tags_list)
 
+# Danbooru order: values and the szurubooru sort tokens they map to
+order_map = {
+    'id': 'sort:id,asc',
+    'id_asc': 'sort:id,asc',
+    'id_desc': 'sort:id',
+    'score': 'sort:score',
+    'score_desc': 'sort:score',
+    'score_asc': 'sort:score,asc',
+    'favcount': 'sort:fav-count',
+    'favcount_asc': 'sort:fav-count,asc',
+    'filesize': 'sort:file-size',
+    'filesize_asc': 'sort:file-size,asc',
+    'mpixels': 'sort:image-area',
+    'mpixels_asc': 'sort:image-area,asc',
+    'tagcount': 'sort:tag-count',
+    'tagcount_asc': 'sort:tag-count,asc',
+    'comment': 'sort:comment-date',
+    'comment_bumped': 'sort:comment-date',
+    'note': 'sort:note-count',
+    'change': 'sort:last-edit-date',
+    'random': 'sort:random',
+}
+
+# Danbooru is: values and the szurubooru tokens they map to
+is_map = {
+    'general': 'safety:safe',
+    'safe': 'safety:safe',
+    'sfw': 'safety:safe',
+    'sensitive': 'safety:sketchy',
+    'questionable': 'safety:sketchy',
+    'explicit': 'safety:unsafe',
+    'nsfw': 'safety:sketchy,unsafe',
+    'jpg': 'type:image',
+    'png': 'type:image',
+    'webp': 'type:image',
+    'gif': 'type:animation',
+    'mp4': 'type:video',
+    'webm': 'type:video',
+}
+
+# Danbooru has: values and the szurubooru tokens they map to
+has_map = {
+    'comments': 'comment-count-min:1',
+    'notes': 'note-count-min:1',
+}
+
+# Danbooru metatags that are renamed in szurubooru
+key_map = {
+    'user': 'uploader',
+    'favcount': 'fav-count',
+    'tagcount': 'tag-count',
+}
+
+# Danbooru metatags without a szurubooru equivalent, dropped instead of failing the search
+dropped_keys = {'order', 'random', 'is', 'has', 'status', 'parent', 'child', 'limit', 'filetype', 'mpixels'}
+
+# Named tokens szurubooru understands for posts
+szuru_post_keys = {
+    'ar', 'area', 'aspect-ratio', 'comment', 'comment-count', 'comment-date', 'comment-time',
+    'content-checksum', 'creation-date', 'creation-time', 'date', 'disliked', 'edit-date', 'edit-time',
+    'fav', 'fav-count', 'fav-date', 'fav-time', 'feature-count', 'feature-date', 'feature-time',
+    'file-size', 'flag', 'height', 'id', 'image-ar', 'image-area', 'image-aspect-ratio', 'image-height',
+    'image-width', 'last-edit-date', 'last-edit-time', 'liked', 'md5', 'note-count', 'note-text', 'pool',
+    'relation-count', 'safety', 'score', 'sha1', 'source', 'submit', 'tag', 'tag-count', 'time', 'type',
+    'upload', 'uploader', 'width', 'sort', 'special',
+}
+
+def convert_range(value: str) -> str:
+    """Convert Danbooru comparisons (>=5, >5, <=5, <5) to szurubooru ranges (5.., ..5)"""
+    for op in ('>=', '<=', '>', '<'):
+        if value.startswith(op):
+            number = value[len(op):]
+            if op == '>' and number.isdigit():
+                return f'{int(number) + 1}..'
+            if op == '<' and number.isdigit():
+                return f'..{int(number) - 1}'
+            return f'{number}..' if op.startswith('>') else f'..{number}'
+    return value
+
+def convert_query_token(token: str) -> str:
+    """Translate one Danbooru search token, returns '' to drop it"""
+    negated = token.startswith('-')
+    body = token[1:] if negated else token
+    if ':' not in body:
+        return token
+    key, value = body.split(':', 1)
+    key = key.lower()
+    prefix = '-' if negated else ''
+
+    if key == 'rating':
+        ratings = [convert_rating(r) for r in value.split(',')]
+        ratings = [r for r in ratings if r]
+        return f"{prefix}safety:{','.join(ratings)}" if ratings else ''
+    if key == 'ordfav':
+        return f'fav:{value}'
+    if key == 'order' and not negated:
+        return order_map.get(value.lower(), '')
+    if key == 'random' and not negated:
+        return 'sort:random'
+    if key == 'is' and value.lower() in is_map:
+        return prefix + is_map[value.lower()]
+    if key == 'has' and value.lower() in has_map:
+        return prefix + has_map[value.lower()]
+    if key in dropped_keys:
+        return ''
+
+    key = key_map.get(key, key)
+    base_key = key.removesuffix('-min').removesuffix('-max')
+    if base_key in szuru_post_keys:
+        return f'{prefix}{key}:{convert_range(value)}'
+    # Not a metatag, e.g. the tag re:zero, so escape the colons
+    return prefix + body.replace(':', '\\:')
+
 def parse_query(query : str) -> str:
-    queries = query.split(' ')
-    for q in queries:
-        if 'rating' in q:
-            rating = q.split(':')[-1]
-            rating = convert_rating(rating)
-            query = query.replace(q, f'safety:{rating}')
-        if 'ordfav:' in q:
-            name = q.split(':')[-1]
-            query = query.replace(q, f'fav:{name}')
-    return query
+    tokens = [convert_query_token(token) for token in query.split()]
+    return ' '.join(token for token in tokens if token)
 
 @staticmethod
 def encode_auth_headers(u: str, p: str) -> str:

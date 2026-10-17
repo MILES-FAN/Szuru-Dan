@@ -26,7 +26,7 @@ def search_posts():
         original_query = query
         query = parse_query(query)
         limit = request.args.get('limit', 40)
-        limit = min(int(limit), 40)
+        limit = min(int(limit), 100)
         page = request.args.get('page', 1)
     
     timer.checkpoint("Query parameters parsed")
@@ -41,14 +41,15 @@ def search_posts():
     offset = (int(page) - 1) * posts_per_page
     
     # 构建API URL
-    api_url = f"{config.SZURUBOORU_API_URL}/posts?offset={offset}&limit={posts_per_page}&query={query}"
+    api_url = f"{config.SZURUBOORU_API_URL}/posts"
+    api_params = {'offset': offset, 'limit': posts_per_page, 'query': query}
     
     timer.checkpoint("API URL constructed")
     
     # 调用Szurubooru API
     with Timer("Szurubooru API request"):
         try:
-            response = requests.get(api_url, headers=headers, timeout=30)
+            response = requests.get(api_url, params=api_params, headers=headers, timeout=30)
         except requests.exceptions.Timeout:
             logger.error(f"API request timeout for query: {original_query}")
             return jsonify({'message': 'API request timeout'}), 504
@@ -87,7 +88,9 @@ def search_posts():
     else:
         timer.checkpoint(f"API error: {response.status_code}")
         timer.summary()
-        return jsonify({'message': 'Failed to fetch posts'}), response.status_code
+        # Danbooru clients check for 401 to report bad credentials, szurubooru answers 403
+        status = 401 if response.status_code == 403 and login else response.status_code
+        return error_response(response, 'Failed to fetch posts')[0], status
 
 @posts_bp.route('/posts/<int:post_id>.json', methods=['GET'])
 def get_post(post_id):
