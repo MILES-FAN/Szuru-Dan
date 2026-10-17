@@ -31,8 +31,7 @@ def extract_auth_from_request():
         if auth.startswith('Basic '):
             auth = auth.split(' ')[1]
             auth = base64.b64decode(auth).decode('utf-8')
-            login, api_key = auth.split(':')
-            print(login, api_key)
+            login, api_key = auth.split(':', 1)
     
     # Try to get from query parameters
     if not login or not api_key:

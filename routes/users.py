@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 import requests
+from urllib.parse import quote
 from config import config
 from services.auth import get_auth_headers
 from models.converters import convert_user_format
@@ -11,7 +12,10 @@ users_bp = Blueprint('users', __name__)
 def get_user(user_id):
     headers, login, api_key = get_auth_headers()
     
-    response = requests.get(f"{config.SZURUBOORU_API_URL}/users/?query={login}", headers=headers)
+    if not login:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+    response = requests.get(f"{config.SZURUBOORU_API_URL}/users/?query={quote(login)}&limit=1", headers=headers)
     if response.status_code == 200:
         user_profile = response.json()
         profile = convert_user_format(user_profile)
@@ -24,7 +28,10 @@ def get_user(user_id):
 def get_profile():
     headers, login, api_key = get_auth_headers()
     
-    response = requests.get(f"{config.SZURUBOORU_API_URL}/users/?query={login}", headers=headers)
+    if not login:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+    response = requests.get(f"{config.SZURUBOORU_API_URL}/users/?query={quote(login)}&limit=1", headers=headers)
     if response.status_code == 200:
         user_profile = response.json()
         profile = convert_user_format(user_profile)
