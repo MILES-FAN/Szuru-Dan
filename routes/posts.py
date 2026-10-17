@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import logging
 import requests
 import time
 from config import config
@@ -6,6 +7,9 @@ from services.auth import get_auth_headers
 from models.converters import convert_post_format
 from utils import parse_query
 from services.timing import Timer, RequestTimer
+from services.szuru import szuru_request, error_response
+
+logger = logging.getLogger(__name__)
 
 posts_bp = Blueprint('posts', __name__)
 
@@ -115,7 +119,16 @@ def get_post(post_id):
         return jsonify({'message': 'Post not found'}), response.status_code
 
 @posts_bp.route('/counts/posts.json', methods=['GET'])
+@posts_bp.route('/counts/posts', methods=['GET'])
 def get_post_count():
+    query = parse_query(request.args.get('tags', ''))
     with Timer("Get post count"):
-        pass  # 这个接口很简单，直接返回固定值
-    return jsonify({'counts': 100}), 200 
+        try:
+            # Only the total is needed, so fetch as little as possible
+            response = szuru_request('GET', 'posts/', params={'query': query, 'limit': 1, 'fields': 'id'})
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Post count request failed: {e}")
+            return jsonify({'message': 'API request failed'}), 500
+    if response.status_code != 200:
+        return error_response(response, 'Failed to count posts')
+    return jsonify({'counts': {'posts': response.json().get('total', 0)}}), 200

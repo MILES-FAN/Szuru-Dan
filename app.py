@@ -6,6 +6,10 @@ from routes.favorites import favorites_bp
 from routes.users import users_bp
 from routes.proxy import proxy_bp
 from routes.admin import admin_bp
+from routes.votes import votes_bp
+from routes.comments import comments_bp
+from routes.notes import notes_bp
+from routes.pools import pools_bp
 
 def create_app():
     app = Flask(__name__)
@@ -18,6 +22,10 @@ def create_app():
     app.register_blueprint(users_bp)
     app.register_blueprint(proxy_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(votes_bp)
+    app.register_blueprint(comments_bp)
+    app.register_blueprint(notes_bp)
+    app.register_blueprint(pools_bp)
     
     return app
 

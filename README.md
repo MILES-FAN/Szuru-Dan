@@ -48,12 +48,17 @@ A flask server that translate szuru api to danbooru style. (To let danbooru clie
 ## Supported API
 - `/posts.json`
 - `/posts/{id}.json`
-- `/favorites.json`
-- `/favorites/{id}.json`
-- `/post_votes.json`
+- `/counts/posts.json`
+- `/favorites.json` (list / create), `/favorites/{id}.json` (delete), `/posts/{id}/favorites.json`
+- `/posts/{id}/votes.json` (vote / remove vote), `/post_votes.json`, `/post_votes/{id}.json`
+- `/comments.json` (list / create), `/comments/{id}.json` (get / update / delete)
+- `/comments/{id}/votes.json`, `/comment_votes.json`, `/comment_votes/{id}.json`
+- `/notes.json`
+- `/pools.json`, `/pools/{id}.json`
+- `/tags.json`
+- `/tags/autocomplete.json`, `/autocomplete.json`
 - `/users/{id}.json`
 - `/profile.json`
-- `/tags/autocomplete.json`
 
 ## Tested Clients
 
