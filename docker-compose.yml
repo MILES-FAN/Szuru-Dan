@@ -1,0 +1,26 @@
+services:
+  szuru-dan:
+    build: .
+    container_name: szuru-dan
+    ports:
+      - "${PORT:-9000}:${PORT:-9000}"
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-9000}/tags/autocomplete.json?search-term=a')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    network_mode: host  # 方便直连宿主机上的 szurubooru，如不需要可删除此行并取消下方 networks 注释
+
+# 若 szurubooru 也在 Docker 中运行，删除 network_mode: host，改用以下配置：
+# networks:
+#   default:
+#     name: szuru-network

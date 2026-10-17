@@ -124,7 +124,6 @@ def parse_query(query : str) -> str:
     tokens = [convert_query_token(token) for token in query.split()]
     return ' '.join(token for token in tokens if token)
 
-@staticmethod
 def encode_auth_headers(u: str, p: str) -> str:
     return b64encode(f"{u}:{p}".encode("utf-8")).decode("ascii")
 
