@@ -8,7 +8,8 @@ services:
       - .env
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-9000}/tags/autocomplete.json?search-term=a')"]
+      # 只检测端口可连通：避免依赖后端鉴权（匿名请求会 403），也不污染请求日志
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', ${PORT:-9000}), 3).close()"]
       interval: 30s
       timeout: 10s
       retries: 3
