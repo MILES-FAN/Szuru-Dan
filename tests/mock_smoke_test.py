@@ -109,4 +109,16 @@ show('delete', '/favorites/7?login=me&api_key=k')
 show('get', '/notes.json?group_by=note&search[post_id]=7&page=1&login=me&api_key=k')
 show('get', '/pools.json?search[name_matches]=abc&search[sort]=name&commit=Search&page=1&login=me&api_key=k')
 show('get', '/tags.json?search[order]=count&search[hide_empty]=true&limit=10&only=id,name,category,post_count&search[name_matches]=*fo*&api_key=k&login=me')
+
+print('=========== oxibooru semantic search passthrough')
+def check_query(tags, expected):
+    show('get', '/posts.json', query_string=dict(auth, tags=tags, limit=1))
+    sent = calls[0][2].get('query')
+    assert sent == expected, f'{tags!r} forwarded as {sent!r}, expected {expected!r}'
+
+check_query('concept:My_Favorites:feed:0.5', 'concept:My_Favorites:feed:0.5')
+check_query('-concept:My_Favorites:0.5.. rating:safe', '-concept:My_Favorites:0.5.. safety:safe')
+check_query('concept:"blue sky":0.3 re:zero', 'concept:"blue sky":0.3 re\\:zero')
+check_query('"red hair":0.5 order:score', '"red hair":0.5 sort:score')
+check_query('sort:concept:My_Favorites', 'sort:concept:My_Favorites')
 srv.shutdown()

@@ -1,3 +1,4 @@
+import re
 from base64 import b64encode
 
 def tags_str(tags):
@@ -92,6 +93,10 @@ def convert_query_token(token: str) -> str:
     body = token[1:] if negated else token
     if ':' not in body:
         return token
+    # Semantic search extensions of the oxibooru backend, forwarded verbatim:
+    # concept:NAME[:...], concept:"text"[:RANGE] and "text"[:RANGE]
+    if body.startswith('"') or body.lower().startswith('concept:'):
+        return token
     key, value = body.split(':', 1)
     key = key.lower()
     prefix = '-' if negated else ''
@@ -120,8 +125,11 @@ def convert_query_token(token: str) -> str:
     # Not a metatag, e.g. the tag re:zero, so escape the colons
     return prefix + body.replace(':', '\\:')
 
+# A token is a run of non-space characters, where a quoted part may contain spaces
+token_pattern = re.compile(r'(?:[^\s"]|"[^"]*"?)+')
+
 def parse_query(query : str) -> str:
-    tokens = [convert_query_token(token) for token in query.split()]
+    tokens = [convert_query_token(token) for token in token_pattern.findall(query)]
     return ' '.join(token for token in tokens if token)
 
 def encode_auth_headers(u: str, p: str) -> str:
