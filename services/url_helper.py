@@ -2,20 +2,20 @@ from flask import request
 from config import config
 
 def get_current_domain():
-    """动态获取当前请求的域名"""
+    """Dynamically get the domain of the current request"""
     if config.REVERSE_PROXY_MODE:
-        # 在反向代理模式下，使用当前请求的域名
+        # In reverse proxy mode, use the current request's domain
         scheme = request.scheme
         host = request.host
         return f"{scheme}://{host}/"
     else:
-        # 普通模式下使用配置的域名
+        # In normal mode, use the configured domain
         return config.DOMAIN_URL
 
 def build_resource_url(resource_path):
-    """构建资源URL"""
+    """Build a resource URL"""
     if config.REVERSE_PROXY_MODE:
-        # 反向代理模式：使用当前域名
+        # Reverse proxy mode: use the current domain
         return f"{get_current_domain()}{resource_path}"
     else:
         return f"{config.DOMAIN_URL}{resource_path}"

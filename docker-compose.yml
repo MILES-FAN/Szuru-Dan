@@ -8,7 +8,7 @@ services:
       - .env
     restart: unless-stopped
     healthcheck:
-      # 只检测端口可连通：避免依赖后端鉴权（匿名请求会 403），也不污染请求日志
+      # Only check that the port is reachable: avoids depending on backend auth (anonymous requests get 403) and keeps the request log clean
       test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', ${PORT:-9000}), 3).close()"]
       interval: 30s
       timeout: 10s
@@ -19,9 +19,9 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    network_mode: host  # 方便直连宿主机上的 szurubooru，如不需要可删除此行并取消下方 networks 注释
+    network_mode: host  # Lets the container reach szurubooru on the host directly; if not needed, remove this line and uncomment the networks section below
 
-# 若 szurubooru 也在 Docker 中运行，删除 network_mode: host，改用以下配置：
+# If szurubooru also runs in Docker, remove network_mode: host and use the following instead:
 # networks:
 #   default:
 #     name: szuru-network

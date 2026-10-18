@@ -16,11 +16,11 @@ posts_bp = Blueprint('posts', __name__)
 @posts_bp.route('/posts', methods=['GET'])
 @posts_bp.route('/posts.json', methods=['GET'])
 def search_posts():
-    # 创建请求计时器
+    # Create a request timer
     timer = RequestTimer()
     timer.checkpoint("Request started")
     
-    # 解析查询参数
+    # Parse query parameters
     with Timer("Parse query parameters"):
         query = request.args.get('tags', '')
         original_query = query
@@ -31,7 +31,7 @@ def search_posts():
     
     timer.checkpoint("Query parameters parsed")
     
-    # 获取认证信息
+    # Get authentication info
     with Timer("Get authentication headers"):
         headers, login, api_key = get_auth_headers()
     
@@ -40,13 +40,13 @@ def search_posts():
     posts_per_page = limit
     offset = (int(page) - 1) * posts_per_page
     
-    # 构建API URL
+    # Build the API URL
     api_url = f"{config.SZURUBOORU_API_URL}/posts"
     api_params = {'offset': offset, 'limit': posts_per_page, 'query': query}
     
     timer.checkpoint("API URL constructed")
     
-    # 调用Szurubooru API
+    # Call the Szurubooru API
     with Timer("Szurubooru API request"):
         try:
             response = requests.get(api_url, params=api_params, headers=headers, timeout=30)
@@ -65,7 +65,7 @@ def search_posts():
         
         timer.checkpoint("JSON parsed")
         
-        # 转换格式
+        # Convert the format
         with Timer("Convert post formats"):
             results = szuru_posts.get('results', [])
             danbooru_posts = []
@@ -77,7 +77,7 @@ def search_posts():
         
         timer.checkpoint("All posts converted")
         
-        # 构建响应
+        # Build the response
         with Timer("Build JSON response"):
             response_data = jsonify(danbooru_posts)
         

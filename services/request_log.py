@@ -5,7 +5,7 @@ from flask import request, g
 
 logger = logging.getLogger('request_log')
 
-# 日志中隐藏的敏感参数
+# Sensitive parameters masked in logs
 SENSITIVE_PARAMS = {'api_key', 'password', 'password_hash', 'token'}
 SLOW_THRESHOLD_MS = 1000
 BODY_PREVIEW_LIMIT = 500
@@ -32,7 +32,7 @@ def _body_preview():
 
 
 def init_request_logging(app):
-    """记录每个请求的方法、路径、状态码、耗时；未匹配路由的请求标记为 UNMATCHED"""
+    """Log method, path, status code and duration of every request; requests that match no route are marked UNMATCHED"""
 
     @app.before_request
     def _start_timer():
